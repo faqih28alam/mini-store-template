@@ -3,12 +3,13 @@
 import { useState } from 'react'
 import Link from 'next/link'
 import Image from 'next/image'
-import { Minus, Plus, X, ShoppingBag, ArrowRight, Leaf, Sparkles, Heart, PackageCheck } from 'lucide-react'
+import { Minus, Plus, X, ShoppingBag, ArrowRight, Leaf, Sparkles, Heart, PackageCheck, ShoppingCart } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Separator } from '@/components/ui/separator'
 import { Input } from '@/components/ui/input'
+import { toast } from "sonner"
 
 // Mock cart data - replace with your actual cart store/state
 const initialCartItems = [
@@ -48,6 +49,17 @@ export default function CartPage() {
 
     const updateQuantity = (id: string, newQuantity: number) => {
         if (newQuantity < 1) return
+
+        const item = cartItems.find(i => i.id === id)
+        // Check stock limit
+        if (newQuantity > item!.stock) {
+            toast.warning("Limited stock available", {
+                description: `Only ${item!.stock} items in stock`,
+                icon: <ShoppingBag className="w-4 h-4" />,
+            })
+            return
+        }
+
         setIsUpdating(true)
         setTimeout(() => {
             setCartItems(items =>
@@ -56,6 +68,9 @@ export default function CartPage() {
                 )
             )
             setIsUpdating(false)
+            toast.success("Quantity updated", {
+                duration: 2000,
+            })
         }, 300)
     }
 

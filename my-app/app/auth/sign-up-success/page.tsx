@@ -5,6 +5,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import Link from "next/link";
 
 export default function Page() {
   return (
@@ -24,6 +25,12 @@ export default function Page() {
                 confirm your account before signing in.
               </p>
             </CardContent>
+            <div className="mt-4 text-center text-sm mb-6">
+              Want to see our Products?{" "}
+              <Link href="/products" className="underline underline-offset-4 text-blue-600 dark:text-blue-400">
+                Browse Products
+              </Link>
+            </div>
           </Card>
         </div>
       </div>

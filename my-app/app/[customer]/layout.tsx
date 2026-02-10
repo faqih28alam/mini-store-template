@@ -1,7 +1,8 @@
+import { Toaster } from "@/components/ui/sonner"
 import { ThemeSwitcher } from "@/components/theme-switcher";
 import Navbar from "@/components/navbar";
 
-export default function ProtectedLayout({
+export default function RootLayout({
   children,
 }: {
   children: React.ReactNode;
@@ -31,6 +32,7 @@ export default function ProtectedLayout({
               Supabase
             </a>
           </p>
+          <Toaster />
           <ThemeSwitcher />
         </footer>
 
