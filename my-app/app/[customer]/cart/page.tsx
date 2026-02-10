@@ -15,30 +15,30 @@ import { toast } from "sonner"
 const initialCartItems = [
     {
         id: '1',
-        name: 'Organic Lavender Sleep Pillow',
-        slug: 'organic-lavender-pillow',
-        price: 149000,
-        quantity: 2,
+        name: 'Vitamin C Serum - Brightening',
+        slug: 'vitamin-c-serum',
+        price: 285000,
+        quantity: 1,
         image: '/placeholder-product.jpg',
-        stock: 15,
+        stock: 3,
     },
     {
         id: '2',
-        name: 'Bamboo Yoga Mat - Natural',
-        slug: 'bamboo-yoga-mat',
-        price: 299000,
-        quantity: 1,
+        name: 'Argan Oil Shampoo',
+        slug: 'argan-oil-shampoo',
+        price: 185000,
+        quantity: 2,
         image: '/placeholder-product.jpg',
-        stock: 8,
+        stock: 55,
     },
     {
         id: '3',
-        name: 'Herbal Tea Collection Set',
-        slug: 'herbal-tea-collection',
-        price: 185000,
+        name: 'Natural Lipstick - Rose Pink',
+        slug: 'natural-lipstick-rose',
+        price: 145000,
         quantity: 1,
         image: '/placeholder-product.jpg',
-        stock: 25,
+        stock: 60,
     },
 ]
 
@@ -53,7 +53,7 @@ export default function CartPage() {
         const item = cartItems.find(i => i.id === id)
         // Check stock limit
         if (newQuantity > item!.stock) {
-            toast.warning("Limited stock available", {
+            toast.warning("Almost sold out!", {
                 description: `Only ${item!.stock} items in stock`,
                 icon: <ShoppingBag className="w-4 h-4" />,
             })
@@ -70,6 +70,7 @@ export default function CartPage() {
             setIsUpdating(false)
             toast.success("Quantity updated", {
                 duration: 2000,
+                icon: <ShoppingBag className="w-4 h-4" />,
             })
         }, 300)
     }

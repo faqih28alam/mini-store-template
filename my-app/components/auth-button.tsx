@@ -4,6 +4,7 @@ import { redirect } from "next/navigation";
 import {
   DropdownMenu,
   DropdownMenuContent,
+  DropdownMenuGroup,
   DropdownMenuItem,
   DropdownMenuLabel,
   DropdownMenuSeparator,
@@ -11,6 +12,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "./ui/button";
+import { ChevronDown } from "lucide-react";
 
 export async function AuthButton() {
   const supabase = await createClient();
@@ -27,14 +29,16 @@ export async function AuthButton() {
   return user ? (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <Button variant="ghost" className="relative h-10 w-10 rounded-full border-2 border-[#8DAA91]/20">
-          <Avatar className="h-9 w-9">
+        <Button variant="outline" className="gap-2 px-2">
+          <Avatar className="size-6 rounded-lg">
             {/* Supabase user metadata usually has the avatar_url if using Google/Github */}
             <AvatarImage src={user.user_metadata?.avatar_url} alt="User" />
-            <AvatarFallback className="bg-[#8DAA91] text-white">
+            <AvatarFallback className="bg-[#8DAA91] text-white rounded-lg">
               {user.email?.charAt(0).toUpperCase()}
             </AvatarFallback>
           </Avatar>
+          <div className="truncate">{user.email}</div>
+          <ChevronDown className="size-4" />
         </Button>
       </DropdownMenuTrigger>
 
@@ -50,7 +54,7 @@ export async function AuthButton() {
           <Link href="/products">Search Items 🔎︎</Link>
         </DropdownMenuItem>
         <DropdownMenuItem asChild>
-          <Link href={`/${user.id}/cart`}>My Orders</Link>
+          <Link href={`/${user.id}/cart`}>My Cart</Link>
         </DropdownMenuItem>
         <DropdownMenuSeparator />
         <DropdownMenuItem>

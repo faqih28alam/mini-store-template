@@ -30,86 +30,240 @@ import { Slider } from '@/components/ui/slider'
 
 // Mock product data - replace with your actual data fetching
 const mockProducts = [
+    // Skin Care
     {
         id: '1',
-        name: 'Organic Lavender Sleep Pillow',
-        slug: 'organic-lavender-pillow',
-        price: 149000,
-        category: 'Wellness',
-        categorySlug: 'wellness',
+        name: 'Vitamin C Serum - Brightening',
+        slug: 'vitamin-c-serum',
+        price: 285000,
+        category: 'Skin Care',
+        categorySlug: 'skin-care',
         image: '/placeholder-product.jpg',
-        stock: 15,
-        rating: 4.8,
+        stock: 45,
+        rating: 4.9,
         isNew: true,
     },
     {
         id: '2',
-        name: 'Bamboo Yoga Mat - Natural',
-        slug: 'bamboo-yoga-mat',
-        price: 299000,
-        category: 'Fitness',
-        categorySlug: 'fitness',
+        name: 'Hyaluronic Acid Moisturizer',
+        slug: 'hyaluronic-acid-moisturizer',
+        price: 325000,
+        category: 'Skin Care',
+        categorySlug: 'skin-care',
         image: '/placeholder-product.jpg',
-        stock: 8,
-        rating: 4.9,
-        isNew: false,
-    },
-    {
-        id: '3',
-        name: 'Herbal Tea Collection Set',
-        slug: 'herbal-tea-collection',
-        price: 185000,
-        category: 'Nutrition',
-        categorySlug: 'nutrition',
-        image: '/placeholder-product.jpg',
-        stock: 25,
-        rating: 4.7,
-        isNew: true,
-    },
-    {
-        id: '4',
-        name: 'Essential Oil Diffuser',
-        slug: 'essential-oil-diffuser',
-        price: 225000,
-        category: 'Wellness',
-        categorySlug: 'wellness',
-        image: '/placeholder-product.jpg',
-        stock: 12,
-        rating: 4.6,
-        isNew: false,
-    },
-    {
-        id: '5',
-        name: 'Organic Cotton Meditation Cushion',
-        slug: 'meditation-cushion',
-        price: 175000,
-        category: 'Wellness',
-        categorySlug: 'wellness',
-        image: '/placeholder-product.jpg',
-        stock: 20,
+        stock: 38,
         rating: 4.8,
         isNew: true,
     },
     {
-        id: '6',
-        name: 'Natural Skincare Bundle',
-        slug: 'skincare-bundle',
-        price: 350000,
-        category: 'Beauty',
-        categorySlug: 'beauty',
+        id: '3',
+        name: 'Gentle Cleansing Foam',
+        slug: 'gentle-cleansing-foam',
+        price: 165000,
+        category: 'Skin Care',
+        categorySlug: 'skin-care',
         image: '/placeholder-product.jpg',
-        stock: 5,
+        stock: 60,
+        rating: 4.7,
+        isNew: false,
+    },
+    {
+        id: '4',
+        name: 'Retinol Night Cream',
+        slug: 'retinol-night-cream',
+        price: 425000,
+        category: 'Skin Care',
+        categorySlug: 'skin-care',
+        image: '/placeholder-product.jpg',
+        stock: 25,
         rating: 4.9,
+        isNew: false,
+    },
+    {
+        id: '5',
+        name: 'Sunscreen SPF 50+ PA++++',
+        slug: 'sunscreen-spf-50',
+        price: 245000,
+        category: 'Skin Care',
+        categorySlug: 'skin-care',
+        image: '/placeholder-product.jpg',
+        stock: 70,
+        rating: 4.8,
+        isNew: true,
+    },
+
+    // Hair Care
+    {
+        id: '6',
+        name: 'Argan Oil Shampoo',
+        slug: 'argan-oil-shampoo',
+        price: 185000,
+        category: 'Hair Care',
+        categorySlug: 'hair-care',
+        image: '/placeholder-product.jpg',
+        stock: 55,
+        rating: 4.7,
+        isNew: false,
+    },
+    {
+        id: '7',
+        name: 'Deep Conditioning Hair Mask',
+        slug: 'deep-conditioning-mask',
+        price: 225000,
+        category: 'Hair Care',
+        categorySlug: 'hair-care',
+        image: '/placeholder-product.jpg',
+        stock: 42,
+        rating: 4.8,
+        isNew: true,
+    },
+    {
+        id: '8',
+        name: 'Keratin Leave-In Conditioner',
+        slug: 'keratin-leave-in',
+        price: 165000,
+        category: 'Hair Care',
+        categorySlug: 'hair-care',
+        image: '/placeholder-product.jpg',
+        stock: 48,
+        rating: 4.6,
+        isNew: false,
+    },
+
+    // Hair Do
+    {
+        id: '9',
+        name: 'Strong Hold Hair Gel',
+        slug: 'strong-hold-gel',
+        price: 125000,
+        category: 'Hair Do',
+        categorySlug: 'hair-do',
+        image: '/placeholder-product.jpg',
+        stock: 65,
+        rating: 4.5,
+        isNew: false,
+    },
+    {
+        id: '10',
+        name: 'Heat Protectant Spray',
+        slug: 'heat-protectant-spray',
+        price: 175000,
+        category: 'Hair Do',
+        categorySlug: 'hair-do',
+        image: '/placeholder-product.jpg',
+        stock: 58,
+        rating: 4.7,
+        isNew: true,
+    },
+    {
+        id: '11',
+        name: 'Anti-Frizz Serum',
+        slug: 'anti-frizz-serum',
+        price: 155000,
+        category: 'Hair Do',
+        categorySlug: 'hair-do',
+        image: '/placeholder-product.jpg',
+        stock: 52,
+        rating: 4.6,
+        isNew: false,
+    },
+
+    // Healthcare
+    {
+        id: '12',
+        name: 'Vitamin D3 Supplement - 1000 IU',
+        slug: 'vitamin-d3-supplement',
+        price: 125000,
+        category: 'Healthcare',
+        categorySlug: 'healthcare',
+        image: '/placeholder-product.jpg',
+        stock: 80,
+        rating: 4.8,
+        isNew: false,
+    },
+    {
+        id: '13',
+        name: 'Collagen Peptides Powder',
+        slug: 'collagen-peptides',
+        price: 385000,
+        category: 'Healthcare',
+        categorySlug: 'healthcare',
+        image: '/placeholder-product.jpg',
+        stock: 35,
+        rating: 4.9,
+        isNew: true,
+    },
+
+    // Cosmetics
+    {
+        id: '14',
+        name: 'Natural Lipstick - Rose Pink',
+        slug: 'natural-lipstick-rose',
+        price: 145000,
+        category: 'Cosmetics',
+        categorySlug: 'cosmetics',
+        image: '/placeholder-product.jpg',
+        stock: 60,
+        rating: 4.7,
+        isNew: false,
+    },
+    {
+        id: '15',
+        name: 'Mineral Foundation - Medium',
+        slug: 'mineral-foundation',
+        price: 265000,
+        category: 'Cosmetics',
+        categorySlug: 'cosmetics',
+        image: '/placeholder-product.jpg',
+        stock: 45,
+        rating: 4.8,
+        isNew: true,
+    },
+    {
+        id: '16',
+        name: 'Waterproof Mascara - Black',
+        slug: 'waterproof-mascara',
+        price: 165000,
+        category: 'Cosmetics',
+        categorySlug: 'cosmetics',
+        image: '/placeholder-product.jpg',
+        stock: 55,
+        rating: 4.6,
+        isNew: false,
+    },
+    {
+        id: '17',
+        name: 'Eyeshadow Palette - Nude Collection',
+        slug: 'eyeshadow-palette-nude',
+        price: 285000,
+        category: 'Cosmetics',
+        categorySlug: 'cosmetics',
+        image: '/placeholder-product.jpg',
+        stock: 32,
+        rating: 4.9,
+        isNew: true,
+    },
+    {
+        id: '18',
+        name: 'Cream Blush - Coral Glow',
+        slug: 'cream-blush-coral',
+        price: 135000,
+        category: 'Cosmetics',
+        categorySlug: 'cosmetics',
+        image: '/placeholder-product.jpg',
+        stock: 48,
+        rating: 4.5,
         isNew: false,
     },
 ]
 
 const categories = [
-    { name: 'All Products', slug: 'all', count: 6 },
-    { name: 'Wellness', slug: 'wellness', count: 3 },
-    { name: 'Fitness', slug: 'fitness', count: 1 },
-    { name: 'Nutrition', slug: 'nutrition', count: 1 },
-    { name: 'Beauty', slug: 'beauty', count: 1 },
+    { name: 'All Products', slug: 'all', count: 18 },
+    { name: 'Skin Care', slug: 'skin-care', count: 5 },
+    { name: 'Hair Care', slug: 'hair-care', count: 3 },
+    { name: 'Hair Do', slug: 'hair-do', count: 3 },
+    { name: 'Healthcare', slug: 'healthcare', count: 2 },
+    { name: 'Cosmetics', slug: 'cosmetics', count: 5 },
 ]
 
 export default function ProductsPage() {
@@ -194,10 +348,10 @@ export default function ProductsPage() {
                         </div>
 
                         <h1 className="font-serif text-5xl md:text-6xl text-foreground font-semibold mb-4 leading-tight">
-                            Wellness <br />Products
+                            Beauty & <br />Wellness
                         </h1>
                         <p className="text-lg text-muted-foreground leading-relaxed mb-8">
-                            Discover our collection of organic, eco-friendly products designed to enhance your well-being journey.
+                            Discover premium cosmetic and healthcare products for your natural beauty and wellness journey.
                         </p>
 
                         {/* Search Bar */}
@@ -233,8 +387,8 @@ export default function ProductsPage() {
                                                 key={category.slug}
                                                 onClick={() => setSelectedCategory(category.slug)}
                                                 className={`w-full flex items-center justify-between px-3 py-2 rounded-lg text-sm transition-colors ${selectedCategory === category.slug
-                                                        ? 'bg-sage-100 dark:bg-midnight-surface text-sage-700 dark:text-sage-300 font-medium'
-                                                        : 'hover:bg-muted text-muted-foreground hover:text-foreground'
+                                                    ? 'bg-sage-100 dark:bg-midnight-surface text-sage-700 dark:text-sage-300 font-medium'
+                                                    : 'hover:bg-muted text-muted-foreground hover:text-foreground'
                                                     }`}
                                             >
                                                 <span>{category.name}</span>
@@ -341,8 +495,8 @@ export default function ProductsPage() {
                                                             key={category.slug}
                                                             onClick={() => setSelectedCategory(category.slug)}
                                                             className={`w-full flex items-center justify-between px-3 py-2 rounded-lg text-sm transition-colors ${selectedCategory === category.slug
-                                                                    ? 'bg-sage-100 dark:bg-midnight-surface text-sage-700 dark:text-sage-300'
-                                                                    : 'hover:bg-muted'
+                                                                ? 'bg-sage-100 dark:bg-midnight-surface text-sage-700 dark:text-sage-300'
+                                                                : 'hover:bg-muted'
                                                                 }`}
                                                         >
                                                             <span>{category.name}</span>
