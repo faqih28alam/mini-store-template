@@ -1,0 +1,628 @@
+'use client'
+
+import { useState, useMemo } from 'react'
+import Link from 'next/link'
+import Image from 'next/image'
+import { Search, SlidersHorizontal, Grid3x3, List, Leaf, ShoppingCart, ArrowRight, Heart, Sparkles, ChevronDown } from 'lucide-react'
+import { Button } from '@/components/ui/button'
+import { Card, CardContent, CardFooter } from '@/components/ui/card'
+import { Input } from '@/components/ui/input'
+import { Badge } from '@/components/ui/badge'
+import { Separator } from '@/components/ui/separator'
+import {
+    Select,
+    SelectContent,
+    SelectItem,
+    SelectTrigger,
+    SelectValue,
+} from '@/components/ui/select'
+import {
+    Sheet,
+    SheetContent,
+    SheetDescription,
+    SheetHeader,
+    SheetTitle,
+    SheetTrigger,
+} from '@/components/ui/sheet'
+import { Label } from '@/components/ui/label'
+import { Checkbox } from '@/components/ui/checkbox'
+import { Slider } from '@/components/ui/slider'
+
+// Mock product data - replace with your actual data fetching
+const mockProducts = [
+    {
+        id: '1',
+        name: 'Organic Lavender Sleep Pillow',
+        slug: 'organic-lavender-pillow',
+        price: 149000,
+        category: 'Wellness',
+        categorySlug: 'wellness',
+        image: '/placeholder-product.jpg',
+        stock: 15,
+        rating: 4.8,
+        isNew: true,
+    },
+    {
+        id: '2',
+        name: 'Bamboo Yoga Mat - Natural',
+        slug: 'bamboo-yoga-mat',
+        price: 299000,
+        category: 'Fitness',
+        categorySlug: 'fitness',
+        image: '/placeholder-product.jpg',
+        stock: 8,
+        rating: 4.9,
+        isNew: false,
+    },
+    {
+        id: '3',
+        name: 'Herbal Tea Collection Set',
+        slug: 'herbal-tea-collection',
+        price: 185000,
+        category: 'Nutrition',
+        categorySlug: 'nutrition',
+        image: '/placeholder-product.jpg',
+        stock: 25,
+        rating: 4.7,
+        isNew: true,
+    },
+    {
+        id: '4',
+        name: 'Essential Oil Diffuser',
+        slug: 'essential-oil-diffuser',
+        price: 225000,
+        category: 'Wellness',
+        categorySlug: 'wellness',
+        image: '/placeholder-product.jpg',
+        stock: 12,
+        rating: 4.6,
+        isNew: false,
+    },
+    {
+        id: '5',
+        name: 'Organic Cotton Meditation Cushion',
+        slug: 'meditation-cushion',
+        price: 175000,
+        category: 'Wellness',
+        categorySlug: 'wellness',
+        image: '/placeholder-product.jpg',
+        stock: 20,
+        rating: 4.8,
+        isNew: true,
+    },
+    {
+        id: '6',
+        name: 'Natural Skincare Bundle',
+        slug: 'skincare-bundle',
+        price: 350000,
+        category: 'Beauty',
+        categorySlug: 'beauty',
+        image: '/placeholder-product.jpg',
+        stock: 5,
+        rating: 4.9,
+        isNew: false,
+    },
+]
+
+const categories = [
+    { name: 'All Products', slug: 'all', count: 6 },
+    { name: 'Wellness', slug: 'wellness', count: 3 },
+    { name: 'Fitness', slug: 'fitness', count: 1 },
+    { name: 'Nutrition', slug: 'nutrition', count: 1 },
+    { name: 'Beauty', slug: 'beauty', count: 1 },
+]
+
+export default function ProductsPage() {
+    const [searchQuery, setSearchQuery] = useState('')
+    const [selectedCategory, setSelectedCategory] = useState('all')
+    const [sortBy, setSortBy] = useState('newest')
+    const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid')
+    const [priceRange, setPriceRange] = useState([0, 500000])
+    const [showOnlyInStock, setShowOnlyInStock] = useState(false)
+    const [showOnlyNew, setShowOnlyNew] = useState(false)
+
+    // Filter and sort products
+    const filteredProducts = useMemo(() => {
+        let products = [...mockProducts]
+
+        // Search filter
+        if (searchQuery) {
+            products = products.filter(p =>
+                p.name.toLowerCase().includes(searchQuery.toLowerCase())
+            )
+        }
+
+        // Category filter
+        if (selectedCategory !== 'all') {
+            products = products.filter(p => p.categorySlug === selectedCategory)
+        }
+
+        // Price filter
+        products = products.filter(p => p.price >= priceRange[0] && p.price <= priceRange[1])
+
+        // Stock filter
+        if (showOnlyInStock) {
+            products = products.filter(p => p.stock > 0)
+        }
+
+        // New filter
+        if (showOnlyNew) {
+            products = products.filter(p => p.isNew)
+        }
+
+        // Sort
+        switch (sortBy) {
+            case 'price-low':
+                products.sort((a, b) => a.price - b.price)
+                break
+            case 'price-high':
+                products.sort((a, b) => b.price - a.price)
+                break
+            case 'name':
+                products.sort((a, b) => a.name.localeCompare(b.name))
+                break
+            case 'rating':
+                products.sort((a, b) => b.rating - a.rating)
+                break
+            default: // newest
+                products.sort((a, b) => (b.isNew ? 1 : 0) - (a.isNew ? 1 : 0))
+        }
+
+        return products
+    }, [searchQuery, selectedCategory, sortBy, priceRange, showOnlyInStock, showOnlyNew])
+
+    const formatPrice = (price: number) => {
+        return new Intl.NumberFormat('id-ID', {
+            style: 'currency',
+            currency: 'IDR',
+            minimumFractionDigits: 0,
+        }).format(price)
+    }
+
+    return (
+        <div className="min-h-screen bg-gradient-to-br from-beige-50 via-beige-100 to-beige-200 dark:from-midnight-base dark:via-midnight-surface dark:to-midnight-base">
+            {/* Hero Section */}
+            <div className="relative overflow-hidden bg-gradient-to-r from-sage-100 to-beige-100 dark:from-midnight-surface dark:to-midnight-base border-b border-sage-200 dark:border-midnight-border">
+                <div className="absolute top-0 right-0 w-96 h-96 bg-sage-300/20 dark:bg-sage-500/10 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2" />
+                <div className="absolute bottom-0 left-0 w-64 h-64 bg-terracotta-200/20 dark:bg-coral-accent/10 rounded-full blur-3xl translate-y-1/2 -translate-x-1/2" />
+
+                <div className="container mx-auto px-4 py-16 max-w-7xl relative">
+                    <div className="max-w-2xl">
+                        <div className="inline-flex items-center gap-2 bg-sage-100 dark:bg-midnight-surface px-4 py-2 rounded-full mb-6">
+                            <Sparkles className="w-4 h-4 text-sage-600 dark:text-sage-400" />
+                            <span className="text-sm font-medium text-sage-700 dark:text-sage-300">Mindfully Curated</span>
+                        </div>
+
+                        <h1 className="font-serif text-5xl md:text-6xl text-foreground font-semibold mb-4 leading-tight">
+                            Wellness <br />Products
+                        </h1>
+                        <p className="text-lg text-muted-foreground leading-relaxed mb-8">
+                            Discover our collection of organic, eco-friendly products designed to enhance your well-being journey.
+                        </p>
+
+                        {/* Search Bar */}
+                        <div className="relative max-w-xl">
+                            <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
+                            <Input
+                                type="text"
+                                placeholder="Search products..."
+                                value={searchQuery}
+                                onChange={(e) => setSearchQuery(e.target.value)}
+                                className="pl-12 h-14 text-base bg-background dark:bg-midnight-surface border-sage-200 dark:border-midnight-border"
+                            />
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div className="container mx-auto px-4 py-12 max-w-7xl">
+                <div className="flex gap-8">
+                    {/* Sidebar Filters - Desktop */}
+                    <aside className="hidden lg:block w-64 flex-shrink-0">
+                        <Card className="sticky top-24">
+                            <CardContent className="p-6 space-y-6">
+                                {/* Categories */}
+                                <div>
+                                    <div className="flex items-center gap-2 mb-4">
+                                        <Leaf className="w-5 h-5 text-sage-600 dark:text-sage-400" />
+                                        <h3 className="font-serif text-lg font-semibold text-foreground">Categories</h3>
+                                    </div>
+                                    <div className="space-y-2">
+                                        {categories.map((category) => (
+                                            <button
+                                                key={category.slug}
+                                                onClick={() => setSelectedCategory(category.slug)}
+                                                className={`w-full flex items-center justify-between px-3 py-2 rounded-lg text-sm transition-colors ${selectedCategory === category.slug
+                                                        ? 'bg-sage-100 dark:bg-midnight-surface text-sage-700 dark:text-sage-300 font-medium'
+                                                        : 'hover:bg-muted text-muted-foreground hover:text-foreground'
+                                                    }`}
+                                            >
+                                                <span>{category.name}</span>
+                                                <Badge variant="secondary" className="text-xs">
+                                                    {category.count}
+                                                </Badge>
+                                            </button>
+                                        ))}
+                                    </div>
+                                </div>
+
+                                <Separator />
+
+                                {/* Price Range */}
+                                <div>
+                                    <h3 className="font-serif text-lg font-semibold text-foreground mb-4">Price Range</h3>
+                                    <div className="space-y-4">
+                                        <Slider
+                                            min={0}
+                                            max={500000}
+                                            step={10000}
+                                            value={priceRange}
+                                            onValueChange={setPriceRange}
+                                            className="w-full"
+                                        />
+                                        <div className="flex items-center justify-between text-sm text-muted-foreground">
+                                            <span>{formatPrice(priceRange[0])}</span>
+                                            <span>{formatPrice(priceRange[1])}</span>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <Separator />
+
+                                {/* Filters */}
+                                <div>
+                                    <h3 className="font-serif text-lg font-semibold text-foreground mb-4">Filters</h3>
+                                    <div className="space-y-3">
+                                        <div className="flex items-center space-x-2">
+                                            <Checkbox
+                                                id="in-stock"
+                                                checked={showOnlyInStock}
+                                                onCheckedChange={(checked) => setShowOnlyInStock(checked as boolean)}
+                                            />
+                                            <Label
+                                                htmlFor="in-stock"
+                                                className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 cursor-pointer"
+                                            >
+                                                In Stock Only
+                                            </Label>
+                                        </div>
+                                        <div className="flex items-center space-x-2">
+                                            <Checkbox
+                                                id="new-arrivals"
+                                                checked={showOnlyNew}
+                                                onCheckedChange={(checked) => setShowOnlyNew(checked as boolean)}
+                                            />
+                                            <Label
+                                                htmlFor="new-arrivals"
+                                                className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 cursor-pointer"
+                                            >
+                                                New Arrivals
+                                            </Label>
+                                        </div>
+                                    </div>
+                                </div>
+                            </CardContent>
+                        </Card>
+                    </aside>
+
+                    {/* Main Content */}
+                    <div className="flex-1 min-w-0">
+                        {/* Toolbar */}
+                        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-8">
+                            <div>
+                                <p className="text-sm text-muted-foreground">
+                                    Showing <span className="font-medium text-foreground">{filteredProducts.length}</span> products
+                                </p>
+                            </div>
+
+                            <div className="flex items-center gap-3">
+                                {/* Mobile Filters */}
+                                <Sheet>
+                                    <SheetTrigger asChild>
+                                        <Button variant="outline" size="sm" className="lg:hidden">
+                                            <SlidersHorizontal className="w-4 h-4 mr-2" />
+                                            Filters
+                                        </Button>
+                                    </SheetTrigger>
+                                    <SheetContent side="left" className="w-80">
+                                        <SheetHeader>
+                                            <SheetTitle className="font-serif">Filters</SheetTitle>
+                                            <SheetDescription>
+                                                Refine your product search
+                                            </SheetDescription>
+                                        </SheetHeader>
+                                        <div className="mt-6 space-y-6">
+                                            {/* Mobile filter content - same as sidebar */}
+                                            <div>
+                                                <h3 className="font-serif text-lg font-semibold mb-4">Categories</h3>
+                                                <div className="space-y-2">
+                                                    {categories.map((category) => (
+                                                        <button
+                                                            key={category.slug}
+                                                            onClick={() => setSelectedCategory(category.slug)}
+                                                            className={`w-full flex items-center justify-between px-3 py-2 rounded-lg text-sm transition-colors ${selectedCategory === category.slug
+                                                                    ? 'bg-sage-100 dark:bg-midnight-surface text-sage-700 dark:text-sage-300'
+                                                                    : 'hover:bg-muted'
+                                                                }`}
+                                                        >
+                                                            <span>{category.name}</span>
+                                                            <Badge variant="secondary">{category.count}</Badge>
+                                                        </button>
+                                                    ))}
+                                                </div>
+                                            </div>
+
+                                            <Separator />
+
+                                            <div>
+                                                <h3 className="font-serif text-lg font-semibold mb-4">Price Range</h3>
+                                                <Slider
+                                                    min={0}
+                                                    max={500000}
+                                                    step={10000}
+                                                    value={priceRange}
+                                                    onValueChange={setPriceRange}
+                                                />
+                                                <div className="flex justify-between mt-2 text-sm text-muted-foreground">
+                                                    <span>{formatPrice(priceRange[0])}</span>
+                                                    <span>{formatPrice(priceRange[1])}</span>
+                                                </div>
+                                            </div>
+
+                                            <Separator />
+
+                                            <div className="space-y-3">
+                                                <div className="flex items-center space-x-2">
+                                                    <Checkbox
+                                                        id="mobile-in-stock"
+                                                        checked={showOnlyInStock}
+                                                        onCheckedChange={(checked) => setShowOnlyInStock(checked as boolean)}
+                                                    />
+                                                    <Label htmlFor="mobile-in-stock">In Stock Only</Label>
+                                                </div>
+                                                <div className="flex items-center space-x-2">
+                                                    <Checkbox
+                                                        id="mobile-new"
+                                                        checked={showOnlyNew}
+                                                        onCheckedChange={(checked) => setShowOnlyNew(checked as boolean)}
+                                                    />
+                                                    <Label htmlFor="mobile-new">New Arrivals</Label>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </SheetContent>
+                                </Sheet>
+
+                                {/* Sort */}
+                                <Select value={sortBy} onValueChange={setSortBy}>
+                                    <SelectTrigger className="w-[180px]">
+                                        <SelectValue placeholder="Sort by" />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                        <SelectItem value="newest">Newest First</SelectItem>
+                                        <SelectItem value="price-low">Price: Low to High</SelectItem>
+                                        <SelectItem value="price-high">Price: High to Low</SelectItem>
+                                        <SelectItem value="name">Name: A to Z</SelectItem>
+                                        <SelectItem value="rating">Highest Rated</SelectItem>
+                                    </SelectContent>
+                                </Select>
+
+                                {/* View Mode */}
+                                <div className="hidden sm:flex items-center gap-1 border rounded-lg p-1">
+                                    <Button
+                                        variant={viewMode === 'grid' ? 'secondary' : 'ghost'}
+                                        size="sm"
+                                        onClick={() => setViewMode('grid')}
+                                        className="h-8 w-8 p-0"
+                                    >
+                                        <Grid3x3 className="w-4 h-4" />
+                                    </Button>
+                                    <Button
+                                        variant={viewMode === 'list' ? 'secondary' : 'ghost'}
+                                        size="sm"
+                                        onClick={() => setViewMode('list')}
+                                        className="h-8 w-8 p-0"
+                                    >
+                                        <List className="w-4 h-4" />
+                                    </Button>
+                                </div>
+                            </div>
+                        </div>
+
+                        {/* Products Grid */}
+                        {filteredProducts.length === 0 ? (
+                            <Card className="p-12 text-center">
+                                <div className="flex flex-col items-center gap-4">
+                                    <div className="w-16 h-16 rounded-full bg-muted flex items-center justify-center">
+                                        <Search className="w-8 h-8 text-muted-foreground" />
+                                    </div>
+                                    <div>
+                                        <h3 className="font-serif text-xl font-semibold mb-2">No products found</h3>
+                                        <p className="text-muted-foreground">Try adjusting your filters or search terms</p>
+                                    </div>
+                                    <Button
+                                        onClick={() => {
+                                            setSearchQuery('')
+                                            setSelectedCategory('all')
+                                            setShowOnlyInStock(false)
+                                            setShowOnlyNew(false)
+                                            setPriceRange([0, 500000])
+                                        }}
+                                        variant="outline"
+                                    >
+                                        Clear Filters
+                                    </Button>
+                                </div>
+                            </Card>
+                        ) : (
+                            <div
+                                className={
+                                    viewMode === 'grid'
+                                        ? 'grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6'
+                                        : 'space-y-4'
+                                }
+                            >
+                                {filteredProducts.map((product, index) => (
+                                    <ProductCard
+                                        key={product.id}
+                                        product={product}
+                                        viewMode={viewMode}
+                                        index={index}
+                                        formatPrice={formatPrice}
+                                    />
+                                ))}
+                            </div>
+                        )}
+                    </div>
+                </div>
+            </div>
+        </div>
+    )
+}
+
+// Product Card Component
+function ProductCard({
+    product,
+    viewMode,
+    index,
+    formatPrice,
+}: {
+    product: typeof mockProducts[0]
+    viewMode: 'grid' | 'list'
+    index: number
+    formatPrice: (price: number) => string
+}) {
+    const [isWishlisted, setIsWishlisted] = useState(false)
+
+    if (viewMode === 'list') {
+        return (
+            <Card className="hover:shadow-lg transition-all group">
+                <CardContent className="p-6">
+                    <div className="flex gap-6">
+                        <Link
+                            href={`/products/${product.slug}`}
+                            className="relative w-32 h-32 rounded-xl overflow-hidden bg-muted flex-shrink-0 group-hover:scale-105 transition-transform"
+                        >
+                            <Image
+                                src={product.image}
+                                alt={product.name}
+                                fill
+                                className="object-cover"
+                            />
+                            {product.isNew && (
+                                <Badge className="absolute top-2 left-2 bg-primary">New</Badge>
+                            )}
+                        </Link>
+
+                        <div className="flex-1 flex flex-col justify-between">
+                            <div>
+                                <Link href={`/products/${product.slug}`}>
+                                    <h3 className="font-serif text-xl font-medium text-foreground hover:text-sage-600 dark:hover:text-sage-400 transition-colors line-clamp-1 mb-2">
+                                        {product.name}
+                                    </h3>
+                                </Link>
+                                <Badge variant="outline" className="mb-3">
+                                    {product.category}
+                                </Badge>
+                                <p className="text-2xl font-semibold text-primary">
+                                    {formatPrice(product.price)}
+                                </p>
+                            </div>
+
+                            <div className="flex items-center gap-3 mt-4">
+                                <Button size="sm" className="flex-1" asChild>
+                                    <Link href={`/products/${product.slug}`}>
+                                        <ShoppingCart className="w-4 h-4 mr-2" />
+                                        View Product
+                                    </Link>
+                                </Button>
+                                <Button
+                                    variant="outline"
+                                    size="icon"
+                                    onClick={() => setIsWishlisted(!isWishlisted)}
+                                    className={isWishlisted ? 'text-red-500' : ''}
+                                >
+                                    <Heart className={`w-4 h-4 ${isWishlisted ? 'fill-current' : ''}`} />
+                                </Button>
+                            </div>
+                        </div>
+                    </div>
+                </CardContent>
+            </Card>
+        )
+    }
+
+    return (
+        <Card className="group hover:shadow-xl transition-all duration-300 overflow-hidden">
+            <div className="relative aspect-square overflow-hidden bg-muted">
+                <Link href={`/products/${product.slug}`}>
+                    <Image
+                        src={product.image}
+                        alt={product.name}
+                        fill
+                        className="object-cover group-hover:scale-110 transition-transform duration-500"
+                    />
+                </Link>
+
+                {/* Badges */}
+                <div className="absolute top-3 left-3 flex gap-2">
+                    {product.isNew && (
+                        <Badge className="bg-primary shadow-lg">New</Badge>
+                    )}
+                    {product.stock < 10 && product.stock > 0 && (
+                        <Badge variant="secondary" className="bg-terracotta-100 dark:bg-coral-500/20 text-terracotta-700 dark:text-coral-accent">
+                            Only {product.stock} left
+                        </Badge>
+                    )}
+                    {product.stock === 0 && (
+                        <Badge variant="secondary" className="bg-muted">
+                            Out of Stock
+                        </Badge>
+                    )}
+                </div>
+
+                {/* Wishlist */}
+                <Button
+                    variant="secondary"
+                    size="icon"
+                    className="absolute top-3 right-3 opacity-0 group-hover:opacity-100 transition-opacity shadow-lg"
+                    onClick={() => setIsWishlisted(!isWishlisted)}
+                >
+                    <Heart className={`w-4 h-4 ${isWishlisted ? 'fill-red-500 text-red-500' : ''}`} />
+                </Button>
+
+                {/* Quick Add to Cart - Shows on hover */}
+                <div className="absolute bottom-0 left-0 right-0 p-4 bg-gradient-to-t from-background/90 to-transparent opacity-0 group-hover:opacity-100 transition-opacity">
+                    <Button size="sm" className="w-full shadow-lg" asChild>
+                        <Link href={`/products/${product.slug}`}>
+                            <ShoppingCart className="w-4 h-4 mr-2" />
+                            Quick View
+                        </Link>
+                    </Button>
+                </div>
+            </div>
+
+            <CardContent className="p-4">
+                <Badge variant="outline" className="mb-2 text-xs">
+                    {product.category}
+                </Badge>
+
+                <Link href={`/products/${product.slug}`}>
+                    <h3 className="font-serif text-lg font-medium text-foreground hover:text-sage-600 dark:hover:text-sage-400 transition-colors line-clamp-2 mb-2 min-h-[3.5rem]">
+                        {product.name}
+                    </h3>
+                </Link>
+
+                <div className="flex items-center justify-between">
+                    <p className="text-xl font-semibold text-primary">
+                        {formatPrice(product.price)}
+                    </p>
+                    <div className="flex items-center gap-1 text-xs text-muted-foreground">
+                        <span>★</span>
+                        <span>{product.rating}</span>
+                    </div>
+                </div>
+            </CardContent>
+        </Card>
+    )
+}
