@@ -34,13 +34,31 @@ export function LoginForm({
     setError(null);
 
     try {
-      const { data, error } = await supabase.auth.signInWithPassword({
+      const { data: authData, error: authError } = await supabase.auth.signInWithPassword({
         email,
         password,
       });
-      if (error) throw error;
+
+      if (authError) throw authError;
+
+      // 2. Fetch the role from the 'profiles' table using the user's ID
+      const { data: profile, error: profileError } = await supabase
+        .from('profiles')
+        .select('role')
+        .eq('id', authData.user.id)
+        .single(); // Use .single() because ID is unique
+      if (profileError) throw profileError;
+
+      const role = profile?.role;
+
+      // Redirect based on user role
+      if (role === "admin") {
+        router.push("/admin/dashboard");
+        return;
+      }
+      console.log("Role:", role);
       // Update this route to redirect to an authenticated route. The user already has an active session.
-      router.push(`/${data.user.id}/cart`);
+      router.push(`/${authData.user.id}/cart`);
     } catch (error: unknown) {
       setError(error instanceof Error ? error.message : "An error occurred");
     } finally {
