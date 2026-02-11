@@ -1,10 +1,10 @@
+"use client";
+
 import Link from "next/link";
-import { createClient } from "@/lib/supabase/server";
-import { redirect } from "next/navigation";
-import {
+import { createClient } from "@/lib/supabase/client";
+import { useRouter } from "next/navigation"; import {
   DropdownMenu,
   DropdownMenuContent,
-  DropdownMenuGroup,
   DropdownMenuItem,
   DropdownMenuLabel,
   DropdownMenuSeparator,
@@ -12,19 +12,24 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "./ui/button";
-import { ChevronDown } from "lucide-react";
+import { ChevronDown, Loader2 } from "lucide-react";
+import { useUser } from "@/app/hooks/use-user";
 
-export async function AuthButton() {
-  const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
+export function AuthButton() {
+  const supabase = createClient();
+  const { user, loading } = useUser();
+  const router = useRouter();
 
-  // Server Action for Logout
+  // Handle Logout
   const signOut = async () => {
-    "use server";
-    const supabase = await createClient();
     await supabase.auth.signOut();
-    return redirect("/auth/login");
+    router.push("/auth/login");
+    router.refresh();
   };
+
+  if (loading) {
+    return <Loader2 className="animate-spin size-5 text-[#8DAA91]" />;
+  }
 
   return user ? (
     <DropdownMenu>
