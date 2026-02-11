@@ -30,6 +30,7 @@ export function AuthButton() {
   if (loading) {
     return <Loader2 className="animate-spin size-5 text-[#8DAA91]" />;
   }
+  // console.log("User Metadata:", user?.user_metadata);
 
   return user ? (
     <DropdownMenu>
@@ -37,12 +38,14 @@ export function AuthButton() {
         <Button variant="outline" className="gap-2 px-2">
           <Avatar className="size-6 rounded-lg">
             {/* Supabase user metadata usually has the avatar_url if using Google/Github */}
-            <AvatarImage src={user.user_metadata?.avatar_url} alt="User" />
+            <AvatarImage
+              src={user.user_metadata?.avatar_url || user.user_metadata?.picture}
+              alt={user.user_metadata?.full_name || "User"} />
             <AvatarFallback className="bg-[#8DAA91] text-white rounded-lg">
               {user.email?.charAt(0).toUpperCase()}
             </AvatarFallback>
           </Avatar>
-          <div className="truncate">{user.email}</div>
+          <div className="truncate">{user.user_metadata?.name || user.email}</div>
           <ChevronDown className="size-4" />
         </Button>
       </DropdownMenuTrigger>
