@@ -27,6 +27,8 @@ import {
 import { Label } from '@/components/ui/label'
 import { Checkbox } from '@/components/ui/checkbox'
 import { Slider } from '@/components/ui/slider'
+import { useCart } from '@/lib/store/cart'
+import { toast } from 'sonner'
 
 type Product = {
     id: string
@@ -173,8 +175,8 @@ export default function ProductsClient({ initialProducts, initialCategories }: P
                                                 key={category.slug}
                                                 onClick={() => setSelectedCategory(category.slug)}
                                                 className={`w-full flex items-center justify-between px-3 py-2 rounded-lg text-sm transition-colors ${selectedCategory === category.slug
-                                                        ? 'bg-sage-100 dark:bg-midnight-surface text-sage-700 dark:text-sage-300 font-medium'
-                                                        : 'hover:bg-muted text-muted-foreground hover:text-foreground'
+                                                    ? 'bg-sage-100 dark:bg-midnight-surface text-sage-700 dark:text-sage-300 font-medium'
+                                                    : 'hover:bg-muted text-muted-foreground hover:text-foreground'
                                                     }`}
                                             >
                                                 <span>{category.name}</span>
@@ -281,8 +283,8 @@ export default function ProductsClient({ initialProducts, initialCategories }: P
                                                             key={category.slug}
                                                             onClick={() => setSelectedCategory(category.slug)}
                                                             className={`w-full flex items-center justify-between px-3 py-2 rounded-lg text-sm transition-colors ${selectedCategory === category.slug
-                                                                    ? 'bg-sage-100 dark:bg-midnight-surface text-sage-700 dark:text-sage-300'
-                                                                    : 'hover:bg-muted'
+                                                                ? 'bg-sage-100 dark:bg-midnight-surface text-sage-700 dark:text-sage-300'
+                                                                : 'hover:bg-muted'
                                                                 }`}
                                                         >
                                                             <span>{category.name}</span>
@@ -433,7 +435,15 @@ function ProductCard({
     formatPrice: (price: number) => string
 }) {
     const [isWishlisted, setIsWishlisted] = useState(false)
+    const { addItem, getItemCount } = useCart()
 
+    const itemCount = getItemCount(product.id)
+
+    // Check if the product is in stock
+    if (product.stock === 0) {
+        return null
+    }
+    // Render differently based on view mode
     if (viewMode === 'list') {
         return (
             <Card className="hover:shadow-lg transition-all group">
@@ -479,7 +489,11 @@ function ProductCard({
                                 <Button
                                     variant="outline"
                                     size="icon"
-                                    onClick={() => setIsWishlisted(!isWishlisted)}
+                                    onClick={(e) => {
+                                        e.preventDefault()
+                                        setIsWishlisted(!isWishlisted)
+                                        toast.success(isWishlisted ? 'Removed from wishlist' : 'Added to wishlist')
+                                    }}
                                     className={isWishlisted ? 'text-red-500' : ''}
                                 >
                                     <Heart className={`w-4 h-4 ${isWishlisted ? 'fill-current' : ''}`} />
@@ -526,7 +540,11 @@ function ProductCard({
                     variant="secondary"
                     size="icon"
                     className="absolute top-3 right-3 opacity-0 group-hover:opacity-100 transition-opacity shadow-lg"
-                    onClick={() => setIsWishlisted(!isWishlisted)}
+                    onClick={(e) => {
+                        e.preventDefault()
+                        setIsWishlisted(!isWishlisted)
+                        toast.success(isWishlisted ? 'Removed from wishlist' : 'Added to wishlist')
+                    }}
                 >
                     <Heart className={`w-4 h-4 ${isWishlisted ? 'fill-red-500 text-red-500' : ''}`} />
                 </Button>
@@ -538,6 +556,14 @@ function ProductCard({
                             <ShoppingCart className="w-4 h-4 mr-2" />
                             Quick View
                         </Link>
+                    </Button>
+                    <Button
+                        size="sm"
+                        variant="outline"
+                        className="w-full mt-2 shadow-lg"
+                        onClick={() => addItem(product)}
+                    >
+                        Add to Cart
                     </Button>
                 </div>
             </div>

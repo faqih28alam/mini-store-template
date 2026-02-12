@@ -1,85 +1,19 @@
 'use client'
 
-import { useState } from 'react'
 import Link from 'next/link'
 import Image from 'next/image'
-import { Minus, Plus, X, ShoppingBag, ArrowRight, Leaf, Sparkles, Heart, PackageCheck, ShoppingCart } from 'lucide-react'
+import { Minus, Plus, X, ShoppingBag, ArrowRight, Leaf, Sparkles, Heart, PackageCheck } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Separator } from '@/components/ui/separator'
 import { Input } from '@/components/ui/input'
-import { toast } from "sonner"
-
-// Mock cart data - replace with your actual cart store/state
-const initialCartItems = [
-    {
-        id: '1',
-        name: 'Vitamin C Serum - Brightening',
-        slug: 'vitamin-c-serum',
-        price: 285000,
-        quantity: 1,
-        image: '/placeholder-product.jpg',
-        stock: 3,
-    },
-    {
-        id: '2',
-        name: 'Argan Oil Shampoo',
-        slug: 'argan-oil-shampoo',
-        price: 185000,
-        quantity: 2,
-        image: '/placeholder-product.jpg',
-        stock: 55,
-    },
-    {
-        id: '3',
-        name: 'Natural Lipstick - Rose Pink',
-        slug: 'natural-lipstick-rose',
-        price: 145000,
-        quantity: 1,
-        image: '/placeholder-product.jpg',
-        stock: 60,
-    },
-]
+import { useCart } from '@/lib/store/cart'
 
 export default function CartPage() {
-    const [cartItems, setCartItems] = useState(initialCartItems)
-    const [isUpdating, setIsUpdating] = useState(false)
-    const [couponCode, setCouponCode] = useState('')
+    const { items, removeItem, updateQuantity, getTotalPrice } = useCart()
 
-    const updateQuantity = (id: string, newQuantity: number) => {
-        if (newQuantity < 1) return
-
-        const item = cartItems.find(i => i.id === id)
-        // Check stock limit
-        if (newQuantity > item!.stock) {
-            toast.warning("Almost sold out!", {
-                description: `Only ${item!.stock} items in stock`,
-                icon: <ShoppingBag className="w-4 h-4" />,
-            })
-            return
-        }
-
-        setIsUpdating(true)
-        setTimeout(() => {
-            setCartItems(items =>
-                items.map(item =>
-                    item.id === id ? { ...item, quantity: newQuantity } : item
-                )
-            )
-            setIsUpdating(false)
-            toast.success("Quantity updated", {
-                duration: 2000,
-                icon: <ShoppingBag className="w-4 h-4" />,
-            })
-        }, 300)
-    }
-
-    const removeItem = (id: string) => {
-        setCartItems(items => items.filter(item => item.id !== id))
-    }
-
-    const subtotal = cartItems.reduce((sum, item) => sum + item.price * item.quantity, 0)
+    const subtotal = getTotalPrice()
     const shipping = subtotal > 500000 ? 0 : 25000
     const total = subtotal + shipping
 
@@ -91,7 +25,7 @@ export default function CartPage() {
         }).format(price)
     }
 
-    if (cartItems.length === 0) {
+    if (items.length === 0) {
         return (
             <div className="min-h-screen bg-gradient-to-br from-beige-50 via-beige-100 to-beige-200 dark:from-midnight-base dark:via-midnight-surface dark:to-midnight-base">
                 <div className="container mx-auto px-4 py-16 max-w-6xl">
@@ -135,7 +69,7 @@ export default function CartPage() {
                         <div>
                             <h1 className="font-serif text-4xl text-foreground font-semibold">Your Cart</h1>
                             <p className="text-muted-foreground text-base">
-                                {cartItems.length} mindful {cartItems.length === 1 ? 'selection' : 'selections'}
+                                {items.length} mindful {items.length === 1 ? 'selection' : 'selections'}
                             </p>
                         </div>
                     </div>
@@ -146,7 +80,7 @@ export default function CartPage() {
                 <div className="grid lg:grid-cols-3 gap-8">
                     {/* Cart Items Column */}
                     <div className="lg:col-span-2 space-y-4">
-                        {cartItems.map((item, index) => (
+                        {items.map((item) => (
                             <Card
                                 key={item.id}
                                 className="hover:shadow-lg transition-all backdrop-blur overflow-hidden group"
@@ -187,6 +121,11 @@ export default function CartPage() {
                                                         <X className="w-5 h-5" />
                                                     </Button>
                                                 </div>
+                                                {item.category && (
+                                                    <Badge variant="outline" className="mb-2">
+                                                        {item.category}
+                                                    </Badge>
+                                                )}
                                                 <p className="text-primary font-semibold text-lg">
                                                     {formatPrice(item.price)}
                                                 </p>
@@ -201,7 +140,7 @@ export default function CartPage() {
                                                             variant="ghost"
                                                             size="icon"
                                                             onClick={() => updateQuantity(item.id, item.quantity - 1)}
-                                                            disabled={item.quantity <= 1 || isUpdating}
+                                                            disabled={item.quantity <= 1}
                                                             className="h-8 w-8 hover:bg-background dark:hover:bg-midnight-base"
                                                         >
                                                             <Minus className="w-4 h-4" />
@@ -213,7 +152,7 @@ export default function CartPage() {
                                                             variant="ghost"
                                                             size="icon"
                                                             onClick={() => updateQuantity(item.id, item.quantity + 1)}
-                                                            disabled={item.quantity >= item.stock || isUpdating}
+                                                            disabled={item.quantity >= item.stock}
                                                             className="h-8 w-8 hover:bg-background dark:hover:bg-midnight-base"
                                                         >
                                                             <Plus className="w-4 h-4" />
@@ -310,28 +249,6 @@ export default function CartPage() {
                                 </CardContent>
                             </Card>
 
-                            {/* Coupon Code Card */}
-                            <Card className="backdrop-blur">
-                                <CardContent className="p-6">
-                                    <h3 className="font-serif text-lg text-foreground mb-3 font-medium">
-                                        Have a coupon?
-                                    </h3>
-                                    <div className="flex gap-2">
-                                        <Input
-                                            placeholder="Enter code"
-                                            value={couponCode}
-                                            onChange={(e) => setCouponCode(e.target.value)}
-                                        />
-                                        <Button
-                                            variant="outline"
-                                            className="border-sage-500 dark:border-sage-600 text-sage-700 dark:text-sage-400 hover:bg-sage-500 hover:text-white dark:hover:bg-sage-600"
-                                        >
-                                            Apply
-                                        </Button>
-                                    </div>
-                                </CardContent>
-                            </Card>
-
                             {/* Trust Badges Card */}
                             <Card className="bg-gradient-to-br from-background to-muted/30">
                                 <CardContent className="p-6 space-y-4">
@@ -340,8 +257,8 @@ export default function CartPage() {
                                             <Leaf className="w-5 h-5 text-sage-600 dark:text-sage-400" />
                                         </div>
                                         <div>
-                                            <p className="font-medium text-foreground text-sm">Eco-Friendly</p>
-                                            <p className="text-xs text-muted-foreground">Sustainable packaging</p>
+                                            <p className="font-medium text-foreground text-sm">Natural Ingredients</p>
+                                            <p className="text-xs text-muted-foreground">Organic & cruelty-free</p>
                                         </div>
                                     </div>
 
@@ -360,8 +277,8 @@ export default function CartPage() {
                                             <Heart className="w-5 h-5 text-primary" />
                                         </div>
                                         <div>
-                                            <p className="font-medium text-foreground text-sm">Mindfully Curated</p>
-                                            <p className="text-xs text-muted-foreground">Quality guaranteed</p>
+                                            <p className="font-medium text-foreground text-sm">Beauty Experts</p>
+                                            <p className="text-xs text-muted-foreground">Curated by professionals</p>
                                         </div>
                                     </div>
                                 </CardContent>
