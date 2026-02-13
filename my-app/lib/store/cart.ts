@@ -1,7 +1,9 @@
+// lib/store/cart.ts
+
 import { create } from 'zustand'
 import { persist, createJSONStorage } from 'zustand/middleware'
 import { toast } from 'sonner'
-import { createClient } from '@/lib/supabase/client'
+import { createClient } from '../supabase/client'
 
 // Types
 export type CartItem = {
@@ -66,84 +68,29 @@ export const useCart = create<CartStore>()(
             isLoading: false,
 
             // Set user ID and load their cart
-            // setUserId: async (userId) => {
-            //     set({ userId })
-
-            //     if (userId) {
-            //         // User logged in - load their cart from DB
-            //         await get().loadCartFromDB()
-            //     } else {
-            //         // User logged out - clear cart
-            //         set({ items: [] })
-            //     }
-            // },
-
-            // Set user ID and handle cart sync
             setUserId: async (userId) => {
+                const currentUserId = get().userId
+
+                if (currentUserId === userId) {
+                    return // Skip if same user
+                }
+
+                set({ userId })
+
                 if (userId) {
-                    // User logged in
-                    set({ isLoading: true })
+                    const guestItems = get().items  // Guest cart
 
-                    const guestItems = get().items // Save guest cart before loading DB
+                    await get().loadCartFromDB()  // Load user's cart
 
-                    // Load user's cart from DB
-                    try {
-                        const { data, error } = await supabase
-                            .from('cart_items')
-                            .select(`
-                                product_id,
-                                quantity,
-                                products (
-                                    id,
-                                    name,
-                                    slug,
-                                    price,
-                                    stock,
-                                    image_url,
-                                    categories (name)
-                                )
-                            `)
-                            .eq('user_id', userId)
+                    const dbItems = get().items  // User's cart from DB
 
-                        if (error) throw error
+                    // Merge them
+                    const mergedItems = mergeCarts(guestItems, dbItems)
 
-                        const dbItems: CartItem[] = data?.map((item: any) => ({
-                            id: item.products.id,
-                            name: item.products.name,
-                            slug: item.products.slug,
-                            price: Number(item.products.price),
-                            quantity: item.quantity,
-                            image: item.products.image_url || '/placeholder-product.jpg',
-                            stock: item.products.stock,
-                            category: item.products.categories?.name,
-                        })) || []
-
-                        // Merge guest cart with DB cart
-                        const mergedItems = mergeCarts(guestItems, dbItems)
-
-                        // Update state with merged items and userId
-                        set({
-                            items: mergedItems,
-                            userId,
-                            isLoading: false
-                        })
-
-                        // Sync merged cart back to DB
-                        await get().syncCartToDB()
-
-                        if (guestItems.length > 0) {
-                            toast.success('Cart synced!', {
-                                description: `${mergedItems.length} items in your cart`
-                            })
-                        }
-                    } catch (error) {
-                        console.error('Error loading cart:', error)
-                        set({ userId, isLoading: false })
-                        toast.error('Failed to sync cart')
-                    }
+                    set({ items: mergedItems })
+                    await get().syncCartToDB()
                 } else {
-                    // User logged out - clear cart
-                    set({ items: [], userId: null })
+                    set({ items: [] })  // ← Also clear cart on logout
                 }
             },
 
@@ -199,7 +146,7 @@ export const useCart = create<CartStore>()(
                 if (!userId) return
 
                 try {
-                    // Delete existing cart items for this user
+                    // Delete old cart items
                     await supabase
                         .from('cart_items')
                         .delete()
@@ -213,11 +160,9 @@ export const useCart = create<CartStore>()(
                             quantity: item.quantity,
                         }))
 
-                        const { error } = await supabase
+                        await supabase
                             .from('cart_items')
                             .insert(cartItems)
-
-                        if (error) throw error
                     }
                 } catch (error) {
                     console.error('Error syncing cart:', error)

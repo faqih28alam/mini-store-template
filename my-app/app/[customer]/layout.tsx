@@ -1,3 +1,5 @@
+// app/[customer]/layout.tsx
+
 import { CartAuthSync } from '@/components/cart-auth-sync'
 import { Toaster } from "@/components/ui/sonner"
 import { ThemeSwitcher } from "@/components/theme-switcher";

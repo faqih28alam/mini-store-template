@@ -1,3 +1,5 @@
+// app/[customer]/cart/page.tsx
+
 'use client'
 
 import Link from 'next/link'
