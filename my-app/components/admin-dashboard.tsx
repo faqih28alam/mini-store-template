@@ -43,6 +43,7 @@ import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
 import { Separator } from '@/components/ui/separator'
 import Image from 'next/image'
+import { useRole } from '../app/hooks/use-user'
 
 type Product = {
     id: string
@@ -76,6 +77,7 @@ type DashboardStats = {
 }
 
 export default function AdminDashboard() {
+    const { role, loading: userLoading } = useRole()
     const [products, setProducts] = useState<Product[]>([])
     const [categories, setCategories] = useState<Category[]>([])
     const [stats, setStats] = useState<DashboardStats>({
@@ -108,6 +110,15 @@ export default function AdminDashboard() {
     })
 
     const supabase = createClient()
+
+    // Redirect non-admin users
+    useEffect(() => {
+        if (!userLoading && role !== 'admin') {
+            console.log('User role is not admin')
+            toast.error('You are not authorized to access this page')
+            window.location.href = '/products'
+        }
+    }, [role, userLoading])
 
     // Fetch data
     useEffect(() => {
