@@ -553,7 +553,6 @@ function ProductCard({
                 <div className="absolute bottom-0 left-0 right-0 p-4 bg-gradient-to-t from-background/90 to-transparent opacity-0 group-hover:opacity-100 transition-opacity">
                     <Button size="sm" className="w-full shadow-lg" asChild>
                         <Link href={`/products/${product.slug}`}>
-                            <ShoppingCart className="w-4 h-4 mr-2" />
                             Quick View
                         </Link>
                     </Button>
@@ -562,8 +561,10 @@ function ProductCard({
                         variant="outline"
                         className="w-full mt-2 shadow-lg"
                         onClick={() => addItem(product)}
+                        disabled={product.stock === 0}
                     >
-                        Add to Cart
+                        <ShoppingCart className="w-4 h-4 mr-2" />
+                        {product.stock === 0 ? 'Out of Stock' : itemCount > 0 ? `In Cart (${itemCount})` : 'Add to Cart'}
                     </Button>
                 </div>
             </div>

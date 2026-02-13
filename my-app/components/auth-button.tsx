@@ -23,7 +23,7 @@ export function AuthButton() {
   // Handle Logout
   const signOut = async () => {
     await supabase.auth.signOut();
-    router.push("/auth/login");
+    router.push("/products");
     router.refresh();
   };
 
