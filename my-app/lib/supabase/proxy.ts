@@ -47,6 +47,35 @@ export async function updateSession(request: NextRequest) {
   const { data } = await supabase.auth.getClaims();
   const user = data?.claims;
 
+  // 1. Check if we are on an admin route
+  const isAdminRoute = request.nextUrl.pathname.startsWith("/admin");
+
+  if (isAdminRoute) {
+    // If no user at all, redirect to login
+    if (!user) {
+      const url = request.nextUrl.clone();
+      url.pathname = "/products";
+      url.searchParams.set("error", "unauthorized");
+      return NextResponse.redirect(url);
+    }
+
+    // Fetch the role from the 'profiles' table
+    const { data: profile } = await supabase
+      .from("profiles")
+      .select("role")
+      .eq("id", user.sub) // 'sub' is the user ID in JWT claims
+      .single();
+
+    // Authorization Check
+    if (profile?.role !== "admin") {
+      const url = request.nextUrl.clone();
+      url.pathname = "/products";
+      url.searchParams.set("error", "unauthorized");
+      return NextResponse.redirect(url);
+    }
+  }
+
+  // PROTECT GENERAL AUTHENTICATED ROUTES
   if (
     request.nextUrl.pathname !== "/" &&
     !user &&

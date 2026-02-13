@@ -1,6 +1,7 @@
 'use client'
 
-import { useState, useMemo } from 'react'
+import { useState, useMemo, useEffect } from 'react'
+import { useSearchParams } from 'next/navigation';
 import Link from 'next/link'
 import Image from 'next/image'
 import { Search, SlidersHorizontal, Grid3x3, List, Leaf, ShoppingCart, ArrowRight, Heart, Sparkles } from 'lucide-react'
@@ -62,6 +63,16 @@ export default function ProductsClient({ initialProducts, initialCategories }: P
     const [priceRange, setPriceRange] = useState([0, 500000])
     const [showOnlyInStock, setShowOnlyInStock] = useState(false)
     const [showOnlyNew, setShowOnlyNew] = useState(false)
+    const searchParams = useSearchParams();
+    const error = searchParams.get('error');
+
+    // Show unauthorized error toast
+    useEffect(() => {
+        if (error === 'unauthorized') {
+            console.log("Unauthorized access attempt to admin dashboard");
+            toast.error("You don't have permission to access the dashboard.");
+        }
+    }, [error]);
 
     // Filter and sort products
     const filteredProducts = useMemo(() => {
