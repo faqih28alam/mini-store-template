@@ -11,9 +11,13 @@ import { Badge } from '@/components/ui/badge'
 import { Separator } from '@/components/ui/separator'
 import { Input } from '@/components/ui/input'
 import { useCart } from '@/lib/store/cart'
+import { useParams } from 'next/navigation';
 
 export default function CartPage() {
     const { items, removeItem, updateQuantity, getTotalPrice } = useCart()
+    const params = useParams();
+    const customerId = params.customer;
+    console.log("Customer ID:", customerId);
 
     const subtotal = getTotalPrice()
     const shipping = subtotal > 500000 ? 0 : 25000
@@ -242,7 +246,7 @@ export default function CartPage() {
                                             size="lg"
                                             className="w-full rounded-full shadow-lg hover:shadow-xl transition-all"
                                         >
-                                            <Link href="/checkout" className="flex items-center justify-center gap-2">
+                                            <Link href={`/${customerId}/checkout`} className="flex items-center justify-center gap-2">
                                                 Proceed to Checkout
                                                 <ArrowRight className="w-5 h-5" />
                                             </Link>
