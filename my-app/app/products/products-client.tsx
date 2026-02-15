@@ -6,7 +6,7 @@ import { useState, useMemo, useEffect } from 'react'
 import { useSearchParams } from 'next/navigation';
 import Link from 'next/link'
 import Image from 'next/image'
-import { Search, SlidersHorizontal, Grid3x3, List, Leaf, ShoppingCart, ArrowRight, Heart, Sparkles } from 'lucide-react'
+import { Search, SlidersHorizontal, Grid3x3, List, Leaf, ShoppingCart, ArrowRight, Heart, Sparkles, X } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
@@ -59,6 +59,7 @@ interface ProductsClientProps {
 
 export default function ProductsClient({ initialProducts, initialCategories }: ProductsClientProps) {
     const [searchQuery, setSearchQuery] = useState('')
+    const [searchTerm, setSearchTerm] = useState('')
     const [selectedCategory, setSelectedCategory] = useState('all')
     const [sortBy, setSortBy] = useState('newest')
     const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid')
@@ -75,6 +76,15 @@ export default function ProductsClient({ initialProducts, initialCategories }: P
             toast.error("You don't have permission to access the dashboard.");
         }
     }, [error]);
+
+    // Debounce effect
+    useEffect(() => {
+        const handler = setTimeout(() => {
+            setSearchQuery(searchTerm)
+        }, 300) // 300ms delay
+
+        return () => clearTimeout(handler)
+    }, [searchTerm])
 
     // Filter and sort products
     const filteredProducts = useMemo(() => {
@@ -161,10 +171,21 @@ export default function ProductsClient({ initialProducts, initialCategories }: P
                             <Input
                                 type="text"
                                 placeholder="Search for skincare, makeup, haircare..."
-                                value={searchQuery}
-                                onChange={(e) => setSearchQuery(e.target.value)}
+                                value={searchTerm}
+                                onChange={(e) => setSearchTerm(e.target.value)}
                                 className="pl-12 h-14 text-base bg-background dark:bg-midnight-surface border-sage-200 dark:border-midnight-border"
                             />
+                            {searchTerm && (
+                                <button
+                                    onClick={() => {
+                                        setSearchTerm('');   // Clear the input immediately
+                                        setSearchQuery('');  // Clear the filter immediately
+                                    }}
+                                    className="absolute right-4 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+                                >
+                                    <X className="w-4 h-4" />
+                                </button>
+                            )}
                         </div>
                     </div>
                 </div>
@@ -397,6 +418,7 @@ export default function ProductsClient({ initialProducts, initialCategories }: P
                                     </div>
                                     <Button
                                         onClick={() => {
+                                            setSearchTerm('')
                                             setSearchQuery('')
                                             setSelectedCategory('all')
                                             setShowOnlyInStock(false)
@@ -452,10 +474,6 @@ function ProductCard({
 
     const itemCount = getItemCount(product.id)
 
-    // Check if the product is in stock
-    if (product.stock === 0) {
-        return null
-    }
     // Render differently based on view mode
     if (viewMode === 'list') {
         return (
