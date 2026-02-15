@@ -69,17 +69,26 @@ export default function ProductsPage() {
     )
 }
 
-// 3. Simple Loading State
+// Loading State
 function ProductsSkeleton() {
     return (
-        <div className="container mx-auto p-12 text-center">
-            <div className="animate-pulse space-y-4">
-                <div className="h-48 bg-gray-200 rounded-xl w-full"></div>
-                <div className="grid grid-cols-3 gap-4">
-                    <div className="h-64 bg-gray-100 rounded-lg"></div>
-                    <div className="h-64 bg-gray-100 rounded-lg"></div>
-                    <div className="h-64 bg-gray-100 rounded-lg"></div>
-                </div>
+        <div className="max-w-5xl mx-auto p-5">
+            {/* Fake Category Tabs */}
+            <div className="flex gap-4 mb-8">
+                {[1, 2, 3, 4].map((i) => (
+                    <div key={i} className="h-8 w-24 bg-gray-200 rounded-full animate-pulse" />
+                ))}
+            </div>
+
+            {/* Fake Product Grid */}
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                {[1, 2, 3, 4, 5, 6].map((i) => (
+                    <div key={i} className="space-y-4">
+                        <div className="h-64 bg-gray-200 rounded-xl animate-pulse" /> {/* Image */}
+                        <div className="h-4 w-2/3 bg-gray-200 rounded animate-pulse" /> {/* Title */}
+                        <div className="h-4 w-1/4 bg-gray-200 rounded animate-pulse" /> {/* Price */}
+                    </div>
+                ))}
             </div>
         </div>
     )

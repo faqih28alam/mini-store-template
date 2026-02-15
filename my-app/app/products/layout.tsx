@@ -1,5 +1,6 @@
 import { ThemeSwitcher } from "@/components/theme-switcher";
 import Navbar from "@/components/navbar";
+import { Suspense } from "react";
 
 export default function ProductsLayout({
     children,
@@ -15,7 +16,9 @@ export default function ProductsLayout({
 
                 {/* CONTENT */}
                 <div className="flex-1 flex flex-col gap-20 max-w-5xl p-5">
-                    {children}
+                    <Suspense fallback={<p>Loading products page ...</p>}>
+                        {children}
+                    </Suspense>
                 </div>
 
                 {/* FOOTER  */}

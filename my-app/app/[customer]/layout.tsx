@@ -4,6 +4,7 @@ import { CartAuthSync } from '@/components/cart-auth-sync'
 import { Toaster } from "@/components/ui/sonner"
 import { ThemeSwitcher } from "@/components/theme-switcher";
 import Navbar from "@/components/navbar";
+import { Suspense } from "react";
 
 export default function RootLayout({
   children,
@@ -19,8 +20,10 @@ export default function RootLayout({
 
         {/* CONTENT */}
         <div className="flex-1 flex flex-col gap-20 max-w-5xl p-5">
-          <CartAuthSync />
-          {children}
+          <Suspense fallback={<p>Loading your cart...</p>}>
+            <CartAuthSync />
+            {children}
+          </Suspense>
         </div>
 
         {/* FOOTER  */}
