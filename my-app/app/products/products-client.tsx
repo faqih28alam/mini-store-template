@@ -1,3 +1,5 @@
+// app/products/products-client.tsx
+
 'use client'
 
 import { useState, useMemo, useEffect } from 'react'
