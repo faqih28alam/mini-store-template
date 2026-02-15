@@ -2,7 +2,7 @@ import { Toaster } from "@/components/ui/sonner"
 import { ThemeSwitcher } from "@/components/theme-switcher";
 import Navbar from "@/components/navbar";
 
-export default function RootLayout({
+export default function AdminLayout({
   children,
 }: {
   children: React.ReactNode;

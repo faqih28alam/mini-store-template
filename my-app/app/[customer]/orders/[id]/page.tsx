@@ -6,12 +6,30 @@ import { useState, useEffect } from 'react'
 import { useParams, useRouter } from 'next/navigation'
 import Link from 'next/link'
 import Image from 'next/image'
-import { ArrowLeft, Package, MapPin, CreditCard, Calendar, CheckCircle2, Clock, Truck, XCircle, Download } from 'lucide-react'
+import { ArrowLeft, Package, MapPin, CreditCard, Calendar, CheckCircle2, Clock, Truck, XCircle, Download, AlertCircle } from 'lucide-react'
+import { toast } from 'sonner'
 import { createClient } from '@/lib/supabase/client'
+import { generateInvoicePDF } from '@/lib/invoice-generator'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Separator } from '@/components/ui/separator'
+import { Textarea } from '@/components/ui/textarea'
+import { Label } from '@/components/ui/label'
+import {
+    Dialog,
+    DialogContent,
+    DialogDescription,
+    DialogHeader,
+    DialogTitle,
+    DialogTrigger,
+    DialogFooter,
+} from '@/components/ui/dialog'
+import {
+    Alert,
+    AlertDescription,
+    AlertTitle,
+} from '@/components/ui/alert'
 
 type OrderDetail = {
     id: string
@@ -44,6 +62,15 @@ type OrderDetail = {
     }[]
 }
 
+type Cancellation = {
+    id: string
+    reason: string
+    status: string
+    admin_notes: string | null
+    created_at: string
+    reviewed_at: string | null
+}
+
 export default function OrderDetailPage() {
     const params = useParams()
     const router = useRouter()
@@ -52,10 +79,15 @@ export default function OrderDetailPage() {
     const supabase = createClient()
 
     const [order, setOrder] = useState<OrderDetail | null>(null)
+    const [cancellation, setCancellation] = useState<Cancellation | null>(null)
     const [loading, setLoading] = useState(true)
+    const [cancelDialogOpen, setCancelDialogOpen] = useState(false)
+    const [cancelReason, setCancelReason] = useState('')
+    const [cancelling, setCancelling] = useState(false)
 
     useEffect(() => {
         fetchOrderDetail()
+        fetchCancellationRequest()
     }, [orderId])
 
     const fetchOrderDetail = async () => {
@@ -85,6 +117,103 @@ export default function OrderDetailPage() {
         }
 
         setLoading(false)
+    }
+
+    const fetchCancellationRequest = async () => {
+        const { data } = await supabase
+            .from('order_cancellations')
+            .select('*')
+            .eq('order_id', orderId)
+            .order('created_at', { ascending: false })
+            .limit(1)
+            .single()
+
+        if (data) {
+            setCancellation(data)
+        }
+    }
+
+    const handleDownloadInvoice = () => {
+        if (!order) return
+
+        // Check if order is paid
+        if (order.payment_status !== 'paid') {
+            toast.error('Invoice not available', {
+                description: 'Invoice can only be downloaded for paid orders',
+            })
+            return
+        }
+
+        const toastId = toast.loading('Generating invoice...')
+
+        try {
+            // Small delay to ensure toast appears
+            setTimeout(() => {
+                generateInvoicePDF(order)
+
+                // Dismiss the loading toast and show success
+                toast.success('Invoice downloaded!', {
+                    id: toastId,
+                })
+            }, 100)
+        } catch (error) {
+            console.error('Error generating invoice:', error)
+            toast.error('Failed to generate invoice', {
+                id: toastId,
+            })
+        }
+    }
+
+    const handleCancelOrder = async () => {
+        if (!cancelReason.trim()) {
+            toast.error('Please provide a reason for cancellation')
+            return
+        }
+
+        setCancelling(true)
+        const toastId = toast.loading('Submitting cancellation request...')
+
+        try {
+            const response = await fetch('/api/orders/cancel', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    orderId: order?.id,
+                    reason: cancelReason,
+                }),
+            })
+
+            const data = await response.json()
+
+            if (!response.ok) {
+                throw new Error(data.error || 'Failed to submit cancellation')
+            }
+
+            toast.success('Cancellation request submitted!', {
+                id: toastId,
+                description: 'Your request is pending admin approval',
+            })
+
+            setCancelDialogOpen(false)
+            setCancelReason('')
+            await fetchCancellationRequest()
+
+        } catch (error: any) {
+            toast.error('Failed to cancel order', {
+                id: toastId,
+                description: error.message,
+            })
+        } finally {
+            setCancelling(false)
+        }
+    }
+
+    const canCancelOrder = () => {
+        if (!order) return false
+        // Can cancel if order is pending, paid, or processing AND no pending cancellation
+        return ['pending', 'paid', 'processing'].includes(order.status) && !cancellation
     }
 
     const formatPrice = (price: number) => {
@@ -246,7 +375,7 @@ export default function OrderDetailPage() {
                         </Link>
                     </Button>
 
-                    <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-4">
+                    <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-4 mb-6">
                         <div>
                             <h1 className="font-serif text-3xl text-foreground font-semibold mb-2">
                                 Order Details
@@ -264,6 +393,66 @@ export default function OrderDetailPage() {
                             </div>
                         </div>
                     </div>
+
+                    {/* Action Buttons */}
+                    <div className="flex flex-wrap gap-3">
+                        <Button
+                            onClick={handleDownloadInvoice}
+                            disabled={order.payment_status !== 'paid'}
+                            variant="outline"
+                        >
+                            <Download className="w-4 h-4 mr-2" />
+                            Download Invoice
+                        </Button>
+
+                        {canCancelOrder() && (
+                            <Dialog open={cancelDialogOpen} onOpenChange={setCancelDialogOpen}>
+                                <DialogTrigger asChild>
+                                    <Button variant="destructive">
+                                        <XCircle className="w-4 h-4 mr-2" />
+                                        Cancel Order
+                                    </Button>
+                                </DialogTrigger>
+                                <DialogContent>
+                                    <DialogHeader>
+                                        <DialogTitle>Cancel Order</DialogTitle>
+                                        <DialogDescription>
+                                            Please provide a reason for cancelling this order. Your request will be reviewed by an admin.
+                                        </DialogDescription>
+                                    </DialogHeader>
+                                    <div className="space-y-4 py-4">
+                                        <div>
+                                            <Label htmlFor="reason">Cancellation Reason *</Label>
+                                            <Textarea
+                                                id="reason"
+                                                placeholder="E.g., Changed my mind, Found a better price, No longer needed..."
+                                                value={cancelReason}
+                                                onChange={(e) => setCancelReason(e.target.value)}
+                                                rows={4}
+                                                className="mt-2"
+                                            />
+                                        </div>
+                                    </div>
+                                    <DialogFooter>
+                                        <Button
+                                            variant="outline"
+                                            onClick={() => setCancelDialogOpen(false)}
+                                            disabled={cancelling}
+                                        >
+                                            Keep Order
+                                        </Button>
+                                        <Button
+                                            variant="destructive"
+                                            onClick={handleCancelOrder}
+                                            disabled={cancelling || !cancelReason.trim()}
+                                        >
+                                            {cancelling ? 'Submitting...' : 'Submit Cancellation'}
+                                        </Button>
+                                    </DialogFooter>
+                                </DialogContent>
+                            </Dialog>
+                        )}
+                    </div>
                 </div>
             </div>
 
@@ -271,6 +460,36 @@ export default function OrderDetailPage() {
                 <div className="grid lg:grid-cols-3 gap-8">
                     {/* Main Content */}
                     <div className="lg:col-span-2 space-y-6">
+                        {/* Cancellation Status Alert */}
+                        {cancellation && (
+                            <Alert className={
+                                cancellation.status === 'approved' ? 'border-green-500 bg-green-50 dark:bg-green-900/20' :
+                                    cancellation.status === 'rejected' ? 'border-red-500 bg-red-50 dark:bg-red-900/20' :
+                                        'border-yellow-500 bg-yellow-50 dark:bg-yellow-900/20'
+                            }>
+                                <AlertCircle className="h-4 w-4" />
+                                <AlertTitle>
+                                    {cancellation.status === 'pending' && 'Cancellation Request Pending'}
+                                    {cancellation.status === 'approved' && 'Cancellation Approved'}
+                                    {cancellation.status === 'rejected' && 'Cancellation Rejected'}
+                                </AlertTitle>
+                                <AlertDescription className="space-y-2">
+                                    <p><strong>Reason:</strong> {cancellation.reason}</p>
+                                    {cancellation.admin_notes && (
+                                        <p><strong>Admin Notes:</strong> {cancellation.admin_notes}</p>
+                                    )}
+                                    <p className="text-sm text-muted-foreground">
+                                        Submitted: {formatDate(cancellation.created_at)}
+                                    </p>
+                                    {cancellation.reviewed_at && (
+                                        <p className="text-sm text-muted-foreground">
+                                            Reviewed: {formatDate(cancellation.reviewed_at)}
+                                        </p>
+                                    )}
+                                </AlertDescription>
+                            </Alert>
+                        )}
+
                         {/* Order Items */}
                         <Card>
                             <CardHeader>
