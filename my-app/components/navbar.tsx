@@ -1,13 +1,16 @@
+// components/navbar.tsx
+
 import Link from "next/link";
 import { Suspense } from "react";
 import { AuthButton } from "./auth-button";
+import { CartBadge } from "./cart-badge";
 import { EnvVarWarning } from "./env-var-warning";
 import { hasEnvVars } from "@/lib/utils";
 
 export default function Navbar() {
     return (
         /* NAVBAR */
-        <nav className="sticky top-0 z-50 w-full flex justify-center border-b border-[#8DAA91]/20 h-20 bg-[#F5F5DC]/80 dark:bg-[#1A1C19]/80 backdrop-blur-none">
+        <nav className="sticky top-0 z-50 w-full flex justify-center border-b border-[#8DAA91]/20 h-20 bg-[#F5F5DC]/80 dark:bg-[#1A1C19]/80 backdrop-blur-md">
             <div className="w-full max-w-5xl flex justify-between items-center p-3 px-5 text-sm">
 
                 {/* LEFT SIDE: Logo & Main Nav */}
@@ -31,8 +34,14 @@ export default function Navbar() {
                     </div>
                 </div>
 
-                {/* RIGHT SIDE: Auth */}
-                <div className="flex items-center gap-4">
+                {/* RIGHT SIDE: Cart + Auth */}
+                <div className="flex items-center gap-3">
+                    {/* Cart Badge */}
+                    <Suspense fallback={null}>
+                        <CartBadge />
+                    </Suspense>
+
+                    {/* Auth Button */}
                     {!hasEnvVars ? (
                         <EnvVarWarning />
                     ) : (
