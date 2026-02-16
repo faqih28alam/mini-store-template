@@ -1,3 +1,5 @@
+// components/cart-badge.tsx
+
 'use client'
 
 import { ShoppingCart } from 'lucide-react'
@@ -5,14 +7,16 @@ import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { useCart } from '@/lib/store/cart'
 import Link from 'next/link'
+import { useParams } from 'next/navigation'
 
 export function CartBadge() {
     const { getTotalItems } = useCart()
     const itemCount = getTotalItems()
+    const params = useParams()
 
     return (
         <Button variant="ghost" size="icon" className="relative" asChild>
-            <Link href="/cart">
+            <Link href={`/${params.id}/cart`}>
                 <ShoppingCart className="h-5 w-5" />
                 {itemCount > 0 && (
                     <Badge
