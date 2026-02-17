@@ -15,7 +15,7 @@ export default function Navbar() {
 
                 {/* LEFT SIDE: Logo & Main Nav */}
                 <div className="flex gap-8 items-center">
-                    <Link href="/" className="flex items-center gap-2 group">
+                    <Link href="/products" className="flex items-center gap-2 group">
                         <div className="w-8 h-8 bg-[#8DAA91] rounded-full flex items-center justify-center text-white font-bold group-hover:bg-[#E07A5F] transition-colors">
                             O
                         </div>
