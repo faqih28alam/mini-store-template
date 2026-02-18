@@ -1,9 +1,10 @@
 // app/[customer]/layout.tsx
 
 import { CartAuthSync } from '@/components/cart-auth-sync'
-import { Toaster } from "@/components/ui/sonner"
+// import { Toaster } from "@/components/ui/sonner"
 import { ThemeSwitcher } from "@/components/theme-switcher";
 import Navbar from "@/components/navbar";
+import { Suspense } from "react";
 
 export default function RootLayout({
   children,
@@ -19,25 +20,32 @@ export default function RootLayout({
 
         {/* CONTENT */}
         <div className="flex-1 flex flex-col gap-20 max-w-5xl p-5">
-          <CartAuthSync />
-          {children}
+          <Suspense fallback={<p>Loading your cart...</p>}>
+            <CartAuthSync />
+            {children}
+          </Suspense>
         </div>
 
         {/* FOOTER  */}
-        <footer className="w-full flex items-center justify-center border-t mx-auto text-center text-xs gap-8 py-16">
-          <p>
-            Powered by{" "}
-            <a
-              href="https://supabase.com/?utm_source=create-next-app&utm_medium=template&utm_term=nextjs"
-              target="_blank"
-              className="font-bold hover:underline"
-              rel="noreferrer"
-            >
-              Supabase
-            </a>
-          </p>
-          <Toaster />
-          <ThemeSwitcher />
+        <footer className="w-full border-t bg-background">
+          <div className="max-w-5xl mx-auto px-5 py-12 flex flex-col md:flex-row justify-between items-center gap-8">
+            <div className="flex flex-col gap-2 items-center md:items-start">
+              <span className="font-bold text-lg tracking-tight">OrganicStore</span>
+              <p className="text-muted-foreground text-sm">
+                © 2026 OrganicStore. All rights reserved.
+              </p>
+            </div>
+
+            <nav className="flex gap-6 text-sm font-medium text-muted-foreground">
+              <a href="#" className="hover:text-foreground transition-colors">Shop</a>
+              <a href="#" className="hover:text-foreground transition-colors">Privacy</a>
+              <a href="#" className="hover:text-foreground transition-colors">Terms</a>
+            </nav>
+
+            <div className="flex items-center gap-4">
+              <ThemeSwitcher />
+            </div>
+          </div>
         </footer>
 
       </div>
