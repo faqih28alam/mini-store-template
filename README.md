@@ -36,7 +36,9 @@ A modern, high-performance E-commerce starter kit built with the **Next.js App R
 
 ---
 
-## 📸 Screenshots
+## 📸 Live Demo: [OrganicStore](https://mini-store-template-one.vercel.app/products)
+
+
 
 ---
 
