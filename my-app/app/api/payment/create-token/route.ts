@@ -41,7 +41,8 @@ export async function POST(request: NextRequest) {
                 quantity: item.quantity,
             })),
             callbacks: {
-                finish: `${process.env.NEXT_PUBLIC_APP_URL}/orders/${orderId}?status=success`,
+                // finish: `${process.env.NEXT_PUBLIC_APP_URL}/orders/${orderId}?status=success`,
+                finish: `${process.env.NEXT_PUBLIC_APP_URL}/products`,
             },
         }
 

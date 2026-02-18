@@ -200,20 +200,24 @@ export default function CheckoutPage() {
                 onSuccess: function (result: any) {
                     console.log('Payment success:', result)
                     clearCart()
-                    router.push(`/orders/${order.id}?status=success`)
+                    // router.push(`/orders/${order.id}?status=success`)
+                    router.push(`/products`)
                 },
                 onPending: function (result: any) {
                     console.log('Payment pending:', result)
-                    router.push(`/orders/${order.id}?status=pending`)
+                    // router.push(`/orders/${order.id}?status=pending`)
+                    router.push(`/products`)
                 },
                 onError: function (result: any) {
                     console.error('Payment error:', result)
                     toast.error('Payment failed')
-                    router.push(`/orders/${order.id}?status=error`)
+                    // router.push(`/orders/${order.id}?status=error`)
+                    router.push(`/products`)
                 },
                 onClose: function () {
                     toast.info('Payment window closed')
-                    router.push(`/orders/${order.id}`)
+                    // router.push(`/orders/${order.id}`)
+                    router.push(`/products`)
                 },
             })
 
