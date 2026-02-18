@@ -137,7 +137,46 @@ export default function AdminOrdersPage() {
         try {
             const { data: { session } } = await supabase.auth.getSession()
 
-            // Update cancellation status
+            // ✅ STEP 1: Fetch the order WITH order_items to restore stock
+            const { data: orderData, error: fetchError } = await supabase
+                .from('orders')
+                .select(`
+                id,
+                payment_status,
+                order_items (
+                    product_id,
+                    quantity
+                )
+            `)
+                .eq('id', selectedCancellation.order_id)
+                .single()
+
+            if (fetchError) throw fetchError
+
+            // ✅ STEP 2: Restore stock for each product (only if order was paid)
+            // Don't restore stock if order was never paid
+            if (orderData.payment_status === 'paid' && orderData.order_items) {
+                console.log('Restoring stock for cancelled order...')
+
+                for (const item of orderData.order_items) {
+                    const { error: stockError } = await supabase.rpc(
+                        'increment_product_stock',
+                        {
+                            product_id: item.product_id,
+                            quantity: item.quantity
+                        }
+                    )
+
+                    if (stockError) {
+                        console.error('Error restoring stock:', stockError)
+                        // Continue anyway - don't fail the whole cancellation
+                    } else {
+                        console.log(`Stock restored: Product ${item.product_id} +${item.quantity}`)
+                    }
+                }
+            }
+
+            // ✅ STEP 3: Update cancellation status
             const { error: cancelError } = await supabase
                 .from('order_cancellations')
                 .update({
@@ -150,7 +189,7 @@ export default function AdminOrdersPage() {
 
             if (cancelError) throw cancelError
 
-            // Update order status
+            // ✅ STEP 4: Update order status
             const { error: orderError } = await supabase
                 .from('orders')
                 .update({
@@ -162,7 +201,7 @@ export default function AdminOrdersPage() {
 
             toast.success('Cancellation approved', {
                 id: toastId,
-                description: 'Order has been cancelled',
+                description: 'Order cancelled and stock restored',
             })
 
             setReviewDialogOpen(false)

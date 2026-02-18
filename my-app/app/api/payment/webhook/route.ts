@@ -46,7 +46,15 @@ export async function POST(request: NextRequest) {
         // Get order from database using order_number
         const { data: order, error: orderError } = await supabase
             .from('orders')
-            .select('id, user_id')
+            .select(`
+                id, 
+                user_id, 
+                payment_status,
+                order_items (
+                    product_id,
+                    quantity
+                )
+            `)
             .eq('order_number', order_id)
             .single()
 
@@ -76,6 +84,36 @@ export async function POST(request: NextRequest) {
         } else if (transaction_status === 'expire') {
             paymentStatus = 'expired'
             orderStatus = 'cancelled'
+        }
+
+
+        // Only decrement stock if payment just became successful
+        // AND it wasn't already paid (prevents double-decrement)
+        const shouldDecrementStock =
+            paymentStatus === 'paid' &&
+            order.payment_status !== 'paid'
+
+        if (shouldDecrementStock && order.order_items) {
+            console.log('Decrementing stock for order:', order_id)
+
+            // Update stock for each product in the order
+            for (const item of order.order_items) {
+                // Decrement stock atomically (prevents race conditions)
+                const { error: stockError } = await supabase.rpc(
+                    'decrement_product_stock',
+                    {
+                        product_id: item.product_id,
+                        quantity: item.quantity
+                    }
+                )
+
+                if (stockError) {
+                    console.error('Error decrementing stock:', stockError)
+                    // Continue anyway - don't fail the whole webhook
+                } else {
+                    console.log(`Stock decremented: Product ${item.product_id} -${item.quantity}`)
+                }
+            }
         }
 
         // Update order status
