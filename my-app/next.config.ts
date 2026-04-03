@@ -12,6 +12,15 @@ const nextConfig: NextConfig = {
       },
     ],
   },
+  async redirects() {
+    return [
+      {
+        source: '/',
+        destination: '/products',
+        permanent: true, // This makes it a 301 redirect
+      },
+    ]
+  },
 };
 
 export default nextConfig;
