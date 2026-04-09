@@ -15,6 +15,7 @@ import { Label } from "@/components/ui/label";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
+import { sendWelcomeEmailAction } from "@/app/actions/send-welcome-email";
 
 export function SignUpForm({
   className,
@@ -40,14 +41,29 @@ export function SignUpForm({
     }
 
     try {
-      const { error } = await supabase.auth.signUp({
+      const { data, error } = await supabase.auth.signUp({
         email,
         password,
         options: {
-          emailRedirectTo: `${window.location.origin}/protected`,
+          emailRedirectTo: `${window.location.origin}/auth/callback`,
         },
       });
+
       if (error) throw error;
+
+      // ✅ Send welcome email via server action (runs on server, has access to env vars)
+      if (data.user) {
+        const name = data.user.user_metadata?.name || email.split('@')[0];
+
+        // Call server action - it runs on the server where env vars are available
+        const result = await sendWelcomeEmailAction(data.user.email!, name);
+
+        if (!result.success) {
+          console.error('Email send failed:', result.error);
+          // Don't block signup - just log the error
+        }
+      }
+
       router.push("/auth/sign-up-success");
     } catch (error: unknown) {
       setError(error instanceof Error ? error.message : "An error occurred");
